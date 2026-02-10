@@ -66,4 +66,16 @@ public class ResourceLoader {
         newBuffer.put(buffer);
         return newBuffer;
     }
+
+    public static InputStream loadAsStream(String path) {
+        InputStream is = ResourceLoader.class
+                .getClassLoader()
+                .getResourceAsStream(path);
+
+        if (is == null) {
+            throw new RuntimeException("Resource not found: " + path);
+        }
+
+        return is;
+    }
 }
