@@ -1,10 +1,14 @@
 package graphics;
 
+import core.Scene;
+import org.joml.Vector3f;
+
 import static org.lwjgl.opengl.GL11.*;
 
 public class Renderer {
     public void init(){
-        glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+        Vector3f color = Scene.worldColor;
+        glClearColor(color.x, color.y, color.z, 1.0f);
     }
 
     public void clear(){
