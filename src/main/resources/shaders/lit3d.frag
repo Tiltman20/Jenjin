@@ -2,6 +2,7 @@
 
 in vec3 vFragPos;
 in vec3 vNormal;
+in vec2 vUV;
 
 out vec4 FragColor;
 
@@ -16,22 +17,25 @@ uniform Light uLights[MAX_LIGHTS];
 uniform int uLightCount;
 
 uniform vec3 uViewPos;
-uniform vec3 uColor; // Oberflächenfarbe
+uniform vec3 uColor;
+
+uniform sampler2D uTexture;
 
 void main() {
     vec3 norm = normalize(vNormal);
     vec3 viewDir = normalize(uViewPos - vFragPos);
+    vec3 albedo = texture(uTexture, vUV).rgb;
 
     vec3 result = vec3(0.0);
 
     for (int i = 0; i < uLightCount; i++) {
         // Ambient
-        vec3 ambient = 0.1 * uLights[i].color * uColor;
+        vec3 ambient = 0.1 * uLights[i].color * uColor * albedo;
 
         // Diffuse
         vec3 lightDir = normalize(uLights[i].position - vFragPos);
         float diff = max(dot(norm, lightDir), 0.0);
-        vec3 diffuse = diff * uLights[i].color * uColor;
+        vec3 diffuse = diff * uLights[i].color * uColor  * albedo;
 
         // Specular (Blinn)
         vec3 halfwayDir = normalize(lightDir + viewDir);

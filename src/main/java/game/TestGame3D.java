@@ -13,14 +13,21 @@ public class TestGame3D implements Game {
     @Override
     public void init() {
         Scene.worldCamera = new Camera3D(70f,1280f/720f,0.1f,100f);
+        Texture3D testTexture = new Texture3D("assets/diceTexture.png");
 
         Material mat1 = new Material("lit3d");
+        mat1.albedo = testTexture;
         mat1.diffuse = new Vector3f(.5f, 1f, 0f);
 
-        Mesh3D cube = ObjLoader.load("assets/complex_torus.obj");
-        Mesh3D cube2 = new Mesh3D(PrimitiveCube.VERTICES, PrimitiveCube.INDICES);
+        Material mat2 = new Material("lit3d");
+        mat2.diffuse = new Vector3f(0.5f, 0.5f, 0.5f);
+
+        Mesh3D cube = ObjLoader.load("assets/cube.obj");
+        Mesh3D cube2 = ObjLoader.load("assets/complex_torus.obj");
         Mesh3D plane = new Mesh3D(PrimitivePlane.VERTICES, PrimitivePlane.INDICES);
         Mesh3D sphere = ObjLoader.load("assets/sphere.obj");
+
+        Mesh3D car = ObjLoader.load("assets/car.obj");
 
         GameObject cubeO = new GameObject(cube);
         GameObject cubeO2 = new GameObject(cube2);
@@ -28,25 +35,34 @@ public class TestGame3D implements Game {
         GameObject sphereO = new GameObject(sphere);
         GameObject sphereO2 = new GameObject(sphere);
 
+        GameObject carO = new GameObject(car);
+        carO.material = mat2;
+
+        cubeO2.transform.parent = cubeO.transform;
+
         cubeO.material = mat1;
         cubeO2.material = mat1;
         planeO.material = mat1;
 
         Scene.addGameObject("Cube 1", cubeO);
         Scene.addGameObject("Cube 2", cubeO2);
+        Scene.addGameObject("Car", carO);
         Scene.addGameObject("Light Sphere 1", sphereO);
         Scene.addGameObject("Light Sphere 2", sphereO2);
         //Scene.addGameObject("Plane", planeO);
         Scene.addLight(new Light(new Vector3f(2f, 2f, 2f), new Vector3f(1f, 1f, 1f)));
-        Scene.addLight(new Light(new Vector3f(-2f, 2f, -2f), new Vector3f(0.1f, 0.5f, 0.75f)));
+        Scene.addLight(new Light(new Vector3f(0f, 10f, 0f), new Vector3f(1f, 1f, 1f)));
         planeO.transform.rotation.x = -90f;
         planeO.transform.position.y -= 2f;
         planeO.transform.scale.set(25f);
-        cubeO2.transform.position.y += 20f;
+        cubeO2.transform.position.y += 2f;
+        cubeO2.transform.position.x -= 2f;
+        cubeO2.transform.scale.set(0.1f);
+        carO.transform.position.y += 5f;
 
         Scene.getGameObject("Light Sphere 1").transform.position = new Vector3f(2f, 2f, 2f);
         Scene.getGameObject("Light Sphere 1").transform.scale.set(.1f);
-        Scene.getGameObject("Light Sphere 2").transform.position = new Vector3f(-2f, 2f, 2f);
+        Scene.getGameObject("Light Sphere 2").transform.position = new Vector3f(0f, 10f, 0f);
         Scene.getGameObject("Light Sphere 2").transform.scale.set(.1f);
 
     }
@@ -54,6 +70,8 @@ public class TestGame3D implements Game {
     @Override
     public void update(float dt) {
         Scene.getGameObject("Cube 1").transform.rotation.y += 45f * dt;
+        Scene.getGameObject("Cube 2").transform.rotation.y -= 90 * dt;
+        Scene.getGameObject("Car").transform.rotation.y += 45f * dt;
         float sensitivity = 0.1f;
 
         Scene.worldCamera.rotate(

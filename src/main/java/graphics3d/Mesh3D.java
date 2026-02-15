@@ -16,14 +16,6 @@ public class Mesh3D {
     private final int indexCount;
 
     public Mesh3D(float[] vertices, int[] indices){
-        System.out.println("Vertex Count: " + vertices.length);
-        System.out.println("Index Count: " + indices.length);
-        for (int i = 0; i < vertices.length; i++) {
-            System.out.println(i + ": " + vertices[i]);
-        }
-        for (int i = 0; i < indices.length; i++) {
-            System.out.println(i + ": " + indices[i]);
-        }
         indexCount = indices.length;
 
         vao = glGenVertexArrays();
@@ -38,16 +30,19 @@ public class Mesh3D {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 6* Float.BYTES, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 8* Float.BYTES, 0);
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(1, 3, GL_FLOAT, false, 6 * Float.BYTES, 3 * Float.BYTES);
+        glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * Float.BYTES, 3 * Float.BYTES);
         glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * Float.BYTES, 6 * Float.BYTES);
+        glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
     }
 
-    public void render(Shader shader){
+    public void render(){
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);

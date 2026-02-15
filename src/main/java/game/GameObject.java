@@ -6,6 +6,8 @@ import graphics.Transform;
 import graphics3d.*;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 public class GameObject {
@@ -28,10 +30,8 @@ public class GameObject {
     public void render(){
         Shader shader = material.shader;
         Camera3D camera = Scene.worldCamera;
-        shader.bind();
-        shader.setMat4("uModel", transform.getModelMatrix());
-        shader.setMat4("uView", camera.getViewMatrix());
-        shader.setMat4("uProjection", camera.getProjectionMatrix());
+        material.bind(transform);
+//        material.render(transform);
 
         shader.setInt("uLightCount", Scene.lights.size());
 
@@ -40,17 +40,13 @@ public class GameObject {
             shader.setVec3("uLights["+i+"].position", l.position.x, l.position.y, l.position.z);
             shader.setVec3("uLights["+i+"].color", l.color.x, l.color.y, l.color.z);
         }
-
         shader.setVec3(
                 "uViewPos",
                 camera.getPosition().x,
                 camera.getPosition().y,
                 camera.getPosition().z
         );
-        shader.setVec3("uColor", material.diffuse.x, material.diffuse.y, material.diffuse.z);
-
-        mesh.render(shader);
-
+        mesh.render();
         shader.unbind();
     }
 

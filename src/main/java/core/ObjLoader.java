@@ -2,6 +2,7 @@ package core;
 
 import graphics3d.Mesh3D;
 import graphics3d.Vertex3D;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.io.BufferedReader;
@@ -18,6 +19,7 @@ public class ObjLoader {
 
         List<Vertex3D> vertices  = new ArrayList<>();
         List<Integer> indices   = new ArrayList<>();
+        List<Vector2f> uvs = new ArrayList<>();
 
         Map<String, Integer> vertexMap = new HashMap<>();
 
@@ -50,8 +52,15 @@ public class ObjLoader {
                         break;
 
                     case "f":
-                        parseFace(tokens, positions, normals,
+                        parseFace(tokens, positions, normals, uvs,
                                 vertices, indices, vertexMap);
+                        break;
+
+                    case "vt":
+                        uvs.add(new Vector2f(
+                                Float.parseFloat(tokens[1]),
+                                Float.parseFloat(tokens[2])
+                        ));
                         break;
                 }
             }
@@ -63,12 +72,11 @@ public class ObjLoader {
         return buildMesh(vertices, indices);
     }
 
-    // ===================== FACE PARSING + TRIANGULATION =====================
-
     private static void parseFace(
             String[] tokens,
             List<Vector3f> positions,
             List<Vector3f> normals,
+            List<Vector2f> uvs,
             List<Vertex3D> vertices,
             List<Integer> indices,
             Map<String, Integer> vertexMap
@@ -85,12 +93,27 @@ public class ObjLoader {
 
                 String[] parts = key.split("/");
 
-                int posIndex  = Integer.parseInt(parts[0]) - 1;
-                int normIndex = Integer.parseInt(parts[2]) - 1;
+                int posIndex = Integer.parseInt(parts[0]) - 1;
+
+                Vector2f uv = new Vector2f(0, 0);      // fallback
+                Vector3f normal = new Vector3f(0, 1, 0); // fallback
+
+                if (parts.length > 1 && !parts[1].isEmpty() && !uvs.isEmpty()) {
+                    int uvIndex = Integer.parseInt(parts[1]) - 1;
+                    if (uvIndex >= 0 && uvIndex < uvs.size())
+                        uv = uvs.get(uvIndex);
+                }
+
+                if (parts.length > 2 && !parts[2].isEmpty() && !normals.isEmpty()) {
+                    int normIndex = Integer.parseInt(parts[2]) - 1;
+                    if (normIndex >= 0 && normIndex < normals.size())
+                        normal = normals.get(normIndex);
+                }
 
                 Vertex3D v = new Vertex3D(
                         positions.get(posIndex),
-                        normals.get(normIndex)
+                        normal,
+                        uv
                 );
 
                 vertices.add(v);
@@ -100,8 +123,6 @@ public class ObjLoader {
 
             faceIndices.add(index);
         }
-
-        // 🔺 Triangulation (Triangle Fan)
         for (int i = 1; i < faceIndices.size() - 1; i++) {
             indices.add(faceIndices.get(0));
             indices.add(faceIndices.get(i));
@@ -109,24 +130,25 @@ public class ObjLoader {
         }
     }
 
-    // ===================== MESH BUILD =====================
-
     private static Mesh3D buildMesh(
             List<Vertex3D> vertices,
             List<Integer> indices
     ) {
-        float[] vertexData = new float[vertices.size() * 6];
+        float[] vertexData = new float[vertices.size() * 8];
 
         for (int i = 0; i < vertices.size(); i++) {
             Vertex3D v = vertices.get(i);
 
-            vertexData[i * 6 + 0] = v.position.x;
-            vertexData[i * 6 + 1] = v.position.y;
-            vertexData[i * 6 + 2] = v.position.z;
+            vertexData[i * 8 + 0] = v.position.x;
+            vertexData[i * 8 + 1] = v.position.y;
+            vertexData[i * 8 + 2] = v.position.z;
 
-            vertexData[i * 6 + 3] = v.normal.x;
-            vertexData[i * 6 + 4] = v.normal.y;
-            vertexData[i * 6 + 5] = v.normal.z;
+            vertexData[i * 8 + 3] = v.normal.x;
+            vertexData[i * 8 + 4] = v.normal.y;
+            vertexData[i * 8 + 5] = v.normal.z;
+
+            vertexData[i * 8 + 6] = v.uv.x;
+            vertexData[i * 8 + 7] = v.uv.y;
         }
 
         int[] indexArray = indices.stream().mapToInt(i -> i).toArray();

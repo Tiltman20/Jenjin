@@ -6,6 +6,7 @@ import org.joml.Vector3f;
 public class Camera3D {
     private final Vector3f position =  new Vector3f(0f, 0f, 3f);
 
+
     private final Vector3f front = new Vector3f(0f, 0f, -1f);
     private final Vector3f up = new Vector3f(0f, 1f, 0f);
     private final Vector3f right = new Vector3f(1f, 0f, 0f);
@@ -44,6 +45,8 @@ public class Camera3D {
         right.set(front).cross(0f, 1f, 0f).normalize();
         up.set(right).cross(front).normalize();
     }
+
+
 
     public void moveForward(float amount) {
         position.add(new Vector3f(front).mul(amount));
