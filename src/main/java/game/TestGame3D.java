@@ -24,14 +24,6 @@ public class TestGame3D implements Game {
 
     @Override
     public void update(float dt) {
-//        for(Node child : scene.getRoot().getChildren()){
-//            child.transform.rotation.y += dt * 45f;
-//            for(Node child2 : child.getChildren()){
-//                if(child2.name == "TestChild"){
-//                    child2.transform.position.y += Math.sin(time) * 0.01f;
-//                }
-//            }
-//        }
         time += dt;
         scene.update(dt);
 
