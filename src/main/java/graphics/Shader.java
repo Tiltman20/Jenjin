@@ -8,7 +8,10 @@ import static org.lwjgl.opengl.GL20.*;
 public class Shader {
     private final int programId;
 
-    public Shader(String vertexSrc, String fragmentSrc){
+    private String shaderName = "";
+
+    public Shader(String vertexSrc, String fragmentSrc, String shaderName){
+        this.shaderName = shaderName;
         int vertexId = compile(vertexSrc, GL_VERTEX_SHADER);
         int fragmentId = compile(fragmentSrc, GL_FRAGMENT_SHADER);
 
@@ -71,6 +74,7 @@ public class Shader {
         glDeleteProgram(programId);
     }
 
-
-
+    public String getName() {
+        return shaderName;
+    }
 }

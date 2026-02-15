@@ -1,77 +1,40 @@
 package game;
 
-import core.Game;
-import core.ObjLoader;
-import core.ResourceLoader;
-import core.Scene;
+import core.*;
+import core.scene.SceneLoader;
+import core.scene.SceneSerializer;
+import core.scene.components.MaterialRenderer;
+import core.scene.components.MeshFilter;
+import core.scene.components.MeshRenderer;
 import graphics.Shader;
 import graphics3d.*;
 import input.*;
 import org.joml.Vector3f;
 
 public class TestGame3D implements Game {
+    private Scene scene;
+    private float time = 0f;
     @Override
     public void init() {
         Scene.worldCamera = new Camera3D(70f,1280f/720f,0.1f,100f);
-        Texture3D testTexture = new Texture3D("assets/diceTexture.png");
-
-        Material mat1 = new Material("lit3d");
-        mat1.albedo = testTexture;
-        mat1.diffuse = new Vector3f(.5f, 1f, 0f);
-
-        Material mat2 = new Material("lit3d");
-        mat2.diffuse = new Vector3f(0.5f, 0.5f, 0.5f);
-
-        Mesh3D cube = ObjLoader.load("assets/cube.obj");
-        Mesh3D cube2 = ObjLoader.load("assets/complex_torus.obj");
-        Mesh3D plane = new Mesh3D(PrimitivePlane.VERTICES, PrimitivePlane.INDICES);
-        Mesh3D sphere = ObjLoader.load("assets/sphere.obj");
-
-        Mesh3D car = ObjLoader.load("assets/car.obj");
-
-        GameObject cubeO = new GameObject(cube);
-        GameObject cubeO2 = new GameObject(cube2);
-        GameObject planeO = new GameObject(plane);
-        GameObject sphereO = new GameObject(sphere);
-        GameObject sphereO2 = new GameObject(sphere);
-
-        GameObject carO = new GameObject(car);
-        carO.material = mat2;
-
-        cubeO2.transform.parent = cubeO.transform;
-
-        cubeO.material = mat1;
-        cubeO2.material = mat1;
-        planeO.material = mat1;
-
-        Scene.addGameObject("Cube 1", cubeO);
-        Scene.addGameObject("Cube 2", cubeO2);
-        Scene.addGameObject("Car", carO);
-        Scene.addGameObject("Light Sphere 1", sphereO);
-        Scene.addGameObject("Light Sphere 2", sphereO2);
-        //Scene.addGameObject("Plane", planeO);
-        Scene.addLight(new Light(new Vector3f(2f, 2f, 2f), new Vector3f(1f, 1f, 1f)));
-        Scene.addLight(new Light(new Vector3f(0f, 10f, 0f), new Vector3f(1f, 1f, 1f)));
-        planeO.transform.rotation.x = -90f;
-        planeO.transform.position.y -= 2f;
-        planeO.transform.scale.set(25f);
-        cubeO2.transform.position.y += 2f;
-        cubeO2.transform.position.x -= 2f;
-        cubeO2.transform.scale.set(0.1f);
-        carO.transform.position.y += 5f;
-
-        Scene.getGameObject("Light Sphere 1").transform.position = new Vector3f(2f, 2f, 2f);
-        Scene.getGameObject("Light Sphere 1").transform.scale.set(.1f);
-        Scene.getGameObject("Light Sphere 2").transform.position = new Vector3f(0f, 10f, 0f);
-        Scene.getGameObject("Light Sphere 2").transform.scale.set(.1f);
-
+        scene = new Scene();
+        Scene.addLight(new Light(new Vector3f(0f, 4f, 0f), new Vector3f(1f, 1f, 1f)));
+        scene = SceneLoader.load("C:\\\\Users\\\\tilma\\\\Desktop\\\\scene2.xml");
     }
 
     @Override
     public void update(float dt) {
-        Scene.getGameObject("Cube 1").transform.rotation.y += 45f * dt;
-        Scene.getGameObject("Cube 2").transform.rotation.y -= 90 * dt;
-        Scene.getGameObject("Car").transform.rotation.y += 45f * dt;
+//        for(Node child : scene.getRoot().getChildren()){
+//            child.transform.rotation.y += dt * 45f;
+//            for(Node child2 : child.getChildren()){
+//                if(child2.name == "TestChild"){
+//                    child2.transform.position.y += Math.sin(time) * 0.01f;
+//                }
+//            }
+//        }
+        time += dt;
+        scene.update(dt);
+
         float sensitivity = 0.1f;
 
         Scene.worldCamera.rotate(
@@ -90,11 +53,11 @@ public class TestGame3D implements Game {
 
     @Override
     public void render() {
-        Scene.render();
+        scene.render();
     }
 
     @Override
     public void cleanup() {
-        Scene.cleanup();
+        scene.cleanup();
     }
 }

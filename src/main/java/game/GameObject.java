@@ -30,7 +30,7 @@ public class GameObject {
     public void render(){
         Shader shader = material.shader;
         Camera3D camera = Scene.worldCamera;
-        material.bind(transform);
+        material.bind(camera, transform);
 //        material.render(transform);
 
         shader.setInt("uLightCount", Scene.lights.size());

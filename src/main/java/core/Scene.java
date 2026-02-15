@@ -4,45 +4,62 @@ import game.GameObject;
 import graphics3d.Camera3D;
 import graphics3d.Light;
 import graphics3d.Mesh3D;
+import core.scene.Component;
+import core.scene.systems.RenderSystem;
+
 import org.joml.Vector3f;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Scene {
-    private static final int MAX_MESHES = 10;
-    public static Map<String, Mesh3D> meshes = new HashMap<String, Mesh3D>();
+    private final int MAX_MESHES = 10;
+    public Map<String, Mesh3D> meshes = new HashMap<String, Mesh3D>();
     public static ArrayList<Light> lights = new ArrayList<>();
-    public static Map<String, GameObject> objects = new HashMap<>();
+    public Map<String, GameObject> objects = new HashMap<>();
 
     public static Vector3f worldColor = new Vector3f(0.2f,0.2f,0.2f);
     public static Camera3D worldCamera = new Camera3D(70f,1280f/720f,0.1f,100f);
 
-    public static void addMesh(String name, Mesh3D mesh) {
-        if(meshes.containsKey(name) || meshes.size() >= MAX_MESHES) return;
-        meshes.put(name, mesh);
+    private final Node root = new Node("Root");
+
+    public Node getRoot(){
+        return root;
     }
 
-    public static void addGameObject(String name, GameObject gameObject) {
-        if(objects.containsKey(name)) return;
-        objects.put(name, gameObject);
+    public void update(float dt){
+        traverseUpdate(root, dt);
     }
 
-    public static GameObject getGameObject(String name) {
-        return objects.get(name);
+    private void traverseUpdate(Node node, float dt) {
+        for(Component c : node.getComponents()){
+            c.update(dt);
+        }
+        for(Node child : node.getChildren()){
+            traverseUpdate(child, dt);
+        }
     }
 
     public static void addLight(Light light) {
         lights.add(light);
     }
 
-    public static void cleanup() {
-        for(GameObject gameObject : objects.values()) gameObject.cleanup();
+    public void cleanup() {
+
     }
 
-    public static void render() {
-        for(GameObject gameObject : objects.values()) gameObject.render();
+    public void render() {
+//        traverseRender(root);
+        RenderSystem.render(root);
+    }
+
+    private void traverseRender(Node node) {
+        for(Component c : node.getComponents()){
+            c.render();
+        }
+        for(Node child : node.getChildren()){
+            traverseRender(child);
+        }
     }
 }

@@ -30,7 +30,8 @@ public class Sprite {
         if (sharedShader == null) {
             sharedShader = new Shader(
                     ResourceLoader.load("shaders/sprite.vert"),
-                    ResourceLoader.load("shaders/sprite.frag")
+                    ResourceLoader.load("shaders/sprite.frag"),
+                    "sprite"
             );
         }
     }
