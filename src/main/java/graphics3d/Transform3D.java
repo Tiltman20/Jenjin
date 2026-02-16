@@ -22,4 +22,9 @@ public class Transform3D {
 
         return parent == null ? local : parent.getModelMatrix().mul(local);
     }
+
+    public Vector3f getWorldPosition(){
+        Matrix4f model = getModelMatrix();
+        return new Vector3f(model.m30(), model.m31(), model.m32());
+    }
 }

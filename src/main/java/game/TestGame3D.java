@@ -13,6 +13,7 @@ import org.joml.Vector3f;
 
 public class TestGame3D implements Game {
     private Scene scene;
+    private boolean freeMouse = true;
     private float time = 0f;
     @Override
     public void init() {
@@ -41,6 +42,10 @@ public class TestGame3D implements Game {
         if (Input.isKeyDown(Keys.D)) Scene.worldCamera.moveRight(speed);
         if (Input.isKeyDown(Keys.SPACE)) Scene.worldCamera.moveUp(speed);
         if (Input.isKeyDown(Keys.LSHIFT)) Scene.worldCamera.moveDown(speed);
+
+        if (Input.isKeyPressed(Keys.ESCAPE)) {
+            Window.setCursorEnabled(1, freeMouse);
+        }
     }
 
     @Override

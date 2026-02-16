@@ -20,9 +20,19 @@ public class SceneLoader {
             Scene scene = new Scene();
 
             Element root = document.getDocumentElement();
-            Element rootNodeXml = (Element) root.getElementsByTagName("node").item(0);
-            Node rootNode = readNode(rootNodeXml);
-            scene.getRoot().addChild(rootNode);
+            NodeList children = root.getChildNodes();
+            for(int i  = 0; i < children.getLength(); i++){
+                if(!(children.item(i) instanceof Element)){
+                    continue;
+                }
+
+                Element nodeXml = (Element) children.item(i);
+
+                if(!nodeXml.getTagName().equals("node"))
+                    continue;
+                Node node = readNode(nodeXml);
+                scene.getRoot().addChild(node);
+            }
 
             return scene;
         }catch(Exception e){

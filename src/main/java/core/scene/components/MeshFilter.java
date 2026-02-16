@@ -1,6 +1,7 @@
 package core.scene.components;
 
 import core.scene.Component;
+import core.scene.ComponentRegistry;
 import graphics3d.Mesh3D;
 import core.ObjLoader;
 import org.w3c.dom.Document;
@@ -15,6 +16,11 @@ public class MeshFilter extends Component {
     public MeshFilter(String meshPath){
         this.meshPath = meshPath;
         this.mesh = ObjLoader.load(meshPath);
+    }
+
+    @Override
+    public Component cloneComponent() {
+        return new MeshFilter(meshPath);
     }
 
     @Override
@@ -33,5 +39,8 @@ public class MeshFilter extends Component {
         meshPath = e.getAttribute("mesh");
         mesh = ObjLoader.load(meshPath);
         return e;
+    }
+    static {
+        ComponentRegistry.register("MeshFilter", MeshFilter::new);
     }
 }

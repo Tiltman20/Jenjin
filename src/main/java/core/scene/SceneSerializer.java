@@ -24,7 +24,10 @@ public class SceneSerializer {
             Element rootElement = doc.createElement("scene");
             doc.appendChild(rootElement);
 
-            writeNode(doc, rootElement, scene.getRoot());
+//            writeNode(doc, rootElement, scene.getRoot());
+            for(Node child: scene.getRoot().getChildren()){
+                writeNode(doc, rootElement, child);
+            }
 
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");

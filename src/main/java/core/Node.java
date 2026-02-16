@@ -15,8 +15,12 @@ public class Node {
     private final List<Node> children = new ArrayList<>();
     private final List<Component> components = new ArrayList<>();
 
+    private static int NEXT_ID = 1;
+    public final int id;
+
     public Node(String name){
         this.name = name;
+        this.id = NEXT_ID++;
     }
 
     public void addChild(Node child){
@@ -32,6 +36,20 @@ public class Node {
     public void addComponent(Component component){
         component.node = this;
         components.add(component);
+    }
+
+    public Node getParent(){
+        return parent;
+    }
+
+    public void removeChild(Node child)  {
+        children.remove(child);
+    }
+
+    public void removeFromParent(){
+        if(parent != null){
+            parent.removeChild(this);
+        }
     }
 
     public <T extends Component> T getComponent(Class<T> type){

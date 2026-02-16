@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<scene>
+    <node name="Cube">
+        <transform px="-1.3654041" py="-0.89859927" pz="-2.999998" rx="0.0" ry="0.0" rz="0.0" sx="1.0" sy="1.0" sz="1.0"/>
+        <components>
+            <component mesh="assets/cube.obj" type="MeshFilter"/>
+            <component albedoPath="assets/testTexture.png" shader="lit3d" type="MaterialRenderer"/>
+        </components>
+        <node name="Car">
+            <transform px="2.6899595" py="-0.83946234" pz="1.0967255E-5" rx="0.0" ry="0.0" rz="0.0" sx="1.0" sy="1.0" sz="1.0"/>
+            <components>
+                <component mesh="assets/car.obj" type="MeshFilter"/>
+                <component shader="lit3d" type="MaterialRenderer"/>
+            </components>
+        </node>
+    </node>
+</scene>

@@ -13,6 +13,11 @@ public class Window {
     private final int height;
 
     private long windowHandle;
+    private static long staticWindowHandle;
+
+    private int framebufferWidth;
+    private int framebufferHeight;
+
 
     public Window(String title, int width, int height){
         this.title = title;
@@ -35,6 +40,7 @@ public class Window {
         if(windowHandle == 0){
             throw new RuntimeException("Failed to create GLFW window");
         }
+        staticWindowHandle = windowHandle;
 
         GLFW.glfwMakeContextCurrent(windowHandle);
         GLFW.glfwSetInputMode(windowHandle, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
@@ -54,7 +60,25 @@ public class Window {
     public void update(){
         GLFW.glfwSwapBuffers(windowHandle);
         GLFW.glfwPollEvents();
+
+        int[] w = new int[1];
+        int[] h = new int[1];
+
+        GLFW.glfwGetFramebufferSize(windowHandle, w, h);
+
+        framebufferWidth = w[0];
+        framebufferHeight = h[0];
+
     }
+
+    public int getFramebufferWidth(){
+        return framebufferWidth;
+    }
+
+    public int getFramebufferHeight(){
+        return framebufferHeight;
+    }
+
 
     public boolean shouldClose(){
         return GLFW.glfwWindowShouldClose(windowHandle);
@@ -65,5 +89,16 @@ public class Window {
         GLFW.glfwTerminate();
         GLFW.glfwSetErrorCallback(null).free();
     }
-    
+
+    public long getHandle() {
+        return windowHandle;
+    }
+
+    public static void setCursorEnabled(long window, boolean enabled){
+        GLFW.glfwSetInputMode(
+                staticWindowHandle,
+                GLFW.GLFW_CURSOR,
+                enabled ? GLFW.GLFW_CURSOR_NORMAL : GLFW.GLFW_CURSOR_DISABLED
+        );
+    }
 }

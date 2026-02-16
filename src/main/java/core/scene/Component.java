@@ -11,6 +11,8 @@ public abstract class Component {
     public void update(float dt){}
     public void render(){}
 
+    public abstract Component cloneComponent();
+
     public abstract String getType();
     public abstract Element writeXML(Document doc, Element componentElement);
     public abstract Element readXML(Element componentElement);

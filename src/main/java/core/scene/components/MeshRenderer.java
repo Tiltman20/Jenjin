@@ -49,6 +49,11 @@ public class MeshRenderer extends Component {
     }
 
     @Override
+    public Component cloneComponent() {
+        return null;
+    }
+
+    @Override
     public String getType() {
         return "MeshRenderer";
     }

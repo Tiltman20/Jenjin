@@ -1,6 +1,7 @@
 package core.scene.components;
 
 import core.scene.Component;
+import core.scene.ComponentRegistry;
 import graphics3d.Material;
 import graphics3d.Texture3D;
 import org.w3c.dom.Document;
@@ -14,6 +15,20 @@ public class MaterialRenderer extends Component{
 
     public MaterialRenderer(Material material){
         this.material = material;
+    }
+
+    @Override
+    public Component cloneComponent() {
+        Material newMat = new Material(material.shaderType);
+
+        if(material.albedoPath != null){
+            newMat.setAlbedo(material.albedoPath);
+        }
+
+        newMat.diffuse.set(material.diffuse);
+        newMat.specular.set(material.specular);
+
+        return new MaterialRenderer(newMat);
     }
 
     @Override
@@ -43,5 +58,8 @@ public class MaterialRenderer extends Component{
             material.albedoPath = albedoPath;
         }
         return e;
+    }
+    static {
+        ComponentRegistry.register("MaterialRenderer", MaterialRenderer::new);
     }
 }
