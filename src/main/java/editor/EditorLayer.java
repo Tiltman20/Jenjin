@@ -20,6 +20,7 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import input.MouseInput;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -70,14 +71,14 @@ public class EditorLayer {
         drawToolbar(engine);
         drawHierarchy(engine);
         drawInspector(engine);
-        drawViewport(engine);
-
+        drawSceneViewport(engine);
+        drawGameViewport(engine);
         handleGizmoDrag(engine);
 
         processDeletions();
     }
 
-    private void drawViewport(Engine engine) {
+    private void drawSceneViewport(Engine engine) {
         int flags =
                 ImGuiWindowFlags.NoScrollbar |
                         ImGuiWindowFlags.NoScrollWithMouse |
@@ -101,7 +102,7 @@ public class EditorLayer {
             return;
         }
 
-        engine.setViewportSize((int)viewportSize.x, (int)viewportSize.y);
+        engine.setSceneViewportSize((int)viewportSize.x,(int)viewportSize.y);
 
         ImGui.invisibleButton("viewport_input",
                 viewportSize.x,
@@ -115,7 +116,7 @@ public class EditorLayer {
 
         ImGui.setCursorScreenPos(viewportPos.x, viewportPos.y);
 
-        int texId = engine.getViewportTexture();
+        int texId = engine.getSceneTexture();
 
         ImGui.image(
                 texId,
@@ -123,6 +124,28 @@ public class EditorLayer {
                 viewportSize.y,
                 0,1, 1,0
         );
+
+        ImGui.end();
+    }
+
+    private void drawGameViewport(Engine engine) {
+        ImGui.begin("Game");
+
+        Vector2f size = new Vector2f(
+                ImGui.getContentRegionAvailX(),
+                ImGui.getContentRegionAvailY()
+        );
+
+        if(size.x<1 || size.y<1){
+            ImGui.end();
+            return;
+        }
+
+        engine.setGameViewportSize((int)size.x,(int)size.y);
+
+        int texId = engine.getGameTexture();
+
+        ImGui.image(texId, size.x, size.y, 0, 1, 1, 0);
 
         ImGui.end();
     }
@@ -139,7 +162,7 @@ public class EditorLayer {
         if(node == null) return;
 
         Vector3f gizmoPos = node.transform.getWorldPosition();
-        float threshold = 0.15f;
+        float threshold = GizmoMath.getPickThreshold(engine.getEditorCamera(), gizmoPos);
 
         Camera3D cam = Scene.worldCamera;
 
@@ -178,29 +201,57 @@ public class EditorLayer {
                 else GizmoState.hoverAxis = Axis.Z;
         }
 
-        Vector3f axisDir = switch (GizmoState.activeAxis) {
-            case X -> new Vector3f(1,0,0);
-            case Y -> new Vector3f(0,1,0);
-            case Z -> new Vector3f(0,0,1);
-            default -> new Vector3f();
-        };
-
         if(MouseInput.isButtonPressed(0) && !GizmoState.dragging && GizmoState.hoverAxis != Axis.NONE){
             GizmoState.activeAxis = GizmoState.hoverAxis;
-            Vector3f hit = EditorCameraUtil.closestPointRayToLine(
-                    rayOrigin, rayDir, gizmoPos, axisDir);
+
+            Vector3f axisDir = switch (GizmoState.activeAxis){
+                case X -> new Vector3f(1,0,0);
+                case Y -> new Vector3f(0,1,0);
+                case Z -> new Vector3f(0,0,1);
+                default -> new Vector3f(1,0,0);
+            };
+            Vector3f camForward = new Vector3f(0,0,-1);
+            Vector3f camRight   = new Vector3f(1,0,0);
+
+            Matrix4f invView = new Matrix4f(cam.getViewMatrix()).invert();
+            invView.transformDirection(camForward);
+            invView.transformDirection(camRight);
+
+            Vector3f planeNormal = axisDir.cross(camForward);
+
+            if(planeNormal.lengthSquared() < 0.0001f){
+                planeNormal = axisDir.cross(camRight);
+            }
+
+            if(planeNormal.lengthSquared() < 0.0001f){
+                planeNormal.set(0,1,0); // absoluter fallback
+            }
+
+            GizmoState.dragPlaneNormal.set(planeNormal.normalize());
+            GizmoState.dragPlanePoint.set(gizmoPos);
+
+            Vector3f hit = EditorCameraUtil.rayPlaneIntersection(
+                    rayOrigin, rayDir,
+                    GizmoState.dragPlanePoint,
+                    GizmoState.dragPlaneNormal);
+            if(hit == null) return;
+
             GizmoState.dragOffset.set(node.transform.getWorldPosition()).sub(hit);
             GizmoState.dragging = true;
         }
         if(MouseInput.isButtonDown(0) && GizmoState.dragging){
-            Vector3f hit = EditorCameraUtil.closestPointRayToLine(
-                    rayOrigin, rayDir, gizmoPos, axisDir);
+            Vector3f hit = EditorCameraUtil.rayPlaneIntersection(
+                    rayOrigin, rayDir,
+                    GizmoState.dragPlanePoint,
+                    GizmoState.dragPlaneNormal);
+            if(hit == null) return;
 
             Vector3f newPos = new Vector3f(hit).add(GizmoState.dragOffset);
+            Vector3f localPos = node.transform.worldToLocalPosition(newPos);
             switch(GizmoState.activeAxis){
-                case X -> node.transform.position.x = newPos.x;
-                case Y -> node.transform.position.y = newPos.y;
-                case Z -> node.transform.position.z = newPos.z;
+                case X -> node.transform.position.x = localPos.x;
+                case Y -> node.transform.position.y = localPos.y;
+                case Z -> node.transform.position.z = localPos.z;
             }
         }
         if(MouseInput.isButtonReleased(0)){

@@ -49,6 +49,8 @@ public class Node {
     public void removeFromParent(){
         if(parent != null){
             parent.removeChild(this);
+            parent = null;
+            transform.parent = null;
         }
     }
 

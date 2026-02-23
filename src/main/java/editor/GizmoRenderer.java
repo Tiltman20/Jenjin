@@ -9,10 +9,8 @@ public class GizmoRenderer {
     public static void render(Node selected, Camera3D cam){
         if(selected == null) return;
 
-        Vector3f camPos = cam.getPosition();
         Vector3f objPos = selected.transform.getWorldPosition();
-        float distance = camPos.distance(objPos);
-        float gizmoScale = distance * 0.1f;
+        float gizmoScale = GizmoMath.getGizmoScale(cam, objPos);
 
         Vector3f red   = new Vector3f(1,0,0);
         Vector3f green = new Vector3f(0,1,0);

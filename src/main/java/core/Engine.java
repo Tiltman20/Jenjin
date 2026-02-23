@@ -73,7 +73,7 @@ public class Engine {
         runtimeScene = editorScene.deepCopy();
         activeScene = runtimeScene;
 
-        Window.setCursorEnabled(window.getHandle(), false);
+        //Window.setCursorEnabled(window.getHandle(), false);
     }
 
     public void exitPlayMode(){
@@ -145,14 +145,14 @@ public class Engine {
     private void init(){
         ComponentRegistry.autoRegister("core.scene.components.MeshFilter");
         ComponentRegistry.autoRegister("core.scene.components.MaterialRenderer");
-        ComponentRegistry.autoRegister("core.scene.components.CameraComponent");
+        ComponentRegistry.autoRegister("core.scene.components.Camera");
+
+        window.init();
+        renderer.init();
 
         sceneFBO = new Framebuffer(1280,720);
         gameFBO  = new Framebuffer(1280,720);
 
-
-        window.init();
-        renderer.init();
         timer.init();
         game.init();
         LineRenderer.init();
@@ -160,7 +160,7 @@ public class Engine {
         editorScene = new Scene();
         activeScene = editorScene;
 
-        createTestScene();
+         createTestScene();
 
         viewportFBO = new Framebuffer(1280, 720);
 
@@ -188,29 +188,41 @@ public class Engine {
     }
 
     private void render() {
-        Camera3D cameraToUse;
 
-        if(mode == EngineMode.EDITOR){
-            cameraToUse = editorCamera;
-        }else{
-            Camera3D gameCamera = activeScene.findMainCamera();
-            cameraToUse = (gameCamera != null) ? gameCamera : editorCamera;
-        }
+        sceneFBO.resize(sceneWidth, sceneHeight);
+        gameFBO.resize(gameWidth, gameHeight);
 
-        Scene.worldCamera = cameraToUse;
-        viewportFBO.resize(viewportWidth, viewportHeight);
-        Scene.worldCamera.setAspect((float)viewportWidth / (float) viewportHeight);
-        viewportFBO.bind();
+        Scene.worldCamera = editorCamera;
+        editorCamera.setAspect((float)sceneWidth/sceneHeight);
+
+        sceneFBO.bind();
         renderer.clear();
         activeScene.render();
-        if(mode == EngineMode.EDITOR){
-            GizmoRenderer.render(EditorSelection.selectedNode, Scene.worldCamera);
+
+        org.lwjgl.opengl.GL11.glDisable(org.lwjgl.opengl.GL11.GL_DEPTH_TEST);
+        org.lwjgl.opengl.GL11.glDisable(org.lwjgl.opengl.GL11.GL_CULL_FACE);
+
+        GizmoRenderer.render(EditorSelection.selectedNode, editorCamera);
+
+        org.lwjgl.opengl.GL11.glEnable(org.lwjgl.opengl.GL11.GL_DEPTH_TEST);
+        org.lwjgl.opengl.GL11.glEnable(org.lwjgl.opengl.GL11.GL_CULL_FACE);
+
+        sceneFBO.unbind(window.getFramebufferWidth(),  window.getFramebufferHeight());
+
+
+        Camera3D gameCamera = activeScene.findMainCamera();
+        if (gameCamera != null){
+            Scene.worldCamera = gameCamera;
+            gameCamera.setAspect((float)gameWidth/gameHeight);
+
+            gameFBO.bind();
+            renderer.clear();
+            activeScene.render();
+            gameFBO.unbind(window.getFramebufferWidth(),  window.getFramebufferHeight());
         }
 
-        viewportFBO.unbind(window.getFramebufferWidth(), window.getFramebufferHeight());
 
         renderer.clear();
-
         editor.begin();
         editor.renderGUI(this);
         editor.end();

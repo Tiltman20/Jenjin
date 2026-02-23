@@ -27,4 +27,26 @@ public class Transform3D {
         Matrix4f model = getModelMatrix();
         return new Vector3f(model.m30(), model.m31(), model.m32());
     }
+
+    public Matrix4f getWorldMatrix(){
+        if(parent == null)
+            return getModelMatrix();
+
+        return new Matrix4f(parent.getWorldMatrix())
+                .mul(getModelMatrix());
+    }
+
+
+    public Vector3f worldToLocalPosition(Vector3f worldPos){
+
+        if(parent == null)
+            return new Vector3f(worldPos);
+
+        Matrix4f invParent = new Matrix4f(parent.getWorldMatrix()).invert();
+        Vector3f local = new Vector3f();
+        invParent.transformPosition(worldPos, local);
+
+        return local;
+    }
+
 }

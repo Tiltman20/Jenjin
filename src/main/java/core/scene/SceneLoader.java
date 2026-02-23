@@ -44,9 +44,9 @@ public class SceneLoader {
         String name = nodeXml.getAttribute("name");
         Node node = new Node(name);
 
-        readTransform(node, nodeXml);
         readComponents(node, nodeXml);
         readChildren(node, nodeXml);
+        readTransform(node, nodeXml);
 
         return node;
     }

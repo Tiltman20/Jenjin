@@ -1,5 +1,6 @@
 package core.scene;
 
+import core.scene.components.Camera;
 import core.scene.components.MaterialRenderer;
 import core.scene.components.MeshFilter;
 import core.scene.components.MeshRenderer;
@@ -10,6 +11,7 @@ public class ComponentFactory {
             case "MeshRenderer" -> new MeshRenderer();
             case "MeshFilter" -> new MeshFilter();
             case "MaterialRenderer" -> new MaterialRenderer();
+            case "Camera" -> new Camera();
             default -> throw new RuntimeException("Unknown component type: " + type);
         };
     }

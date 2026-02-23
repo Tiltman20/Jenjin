@@ -72,26 +72,35 @@ public class EditorCameraUtil {
             Vector3f rayOrigin,
             Vector3f rayDir,
             Vector3f gizmoPos,
-            Axis axis
+            Axis axis,
+            Camera3D cam
     ){
-        float t;
+        Vector3f axisDir = switch (axis){
+            case X -> new Vector3f(1,0,0);
+            case Y -> new Vector3f(0,1,0);
+            case Z -> new Vector3f(0,0,1);
+            default -> new Vector3f(1,0,0);
+        };
 
-        switch(axis){
-            case X -> {
-                t = (gizmoPos.x - rayOrigin.x) / rayDir.x;
-            }
-            case Y -> {
-                t = (gizmoPos.y - rayOrigin.y) / rayDir.y;
-            }
-            case Z -> {
-                t = (gizmoPos.z - rayOrigin.z) / rayDir.z;
-            }
-            default -> {
-                return new Vector3f(gizmoPos);
-            }
-        }
+        // Kamera Vorwärtsrichtung
+        Vector3f camForward = new Vector3f(0,0,-1);
+        new Matrix4f(cam.getViewMatrix()).invert().transformDirection(camForward);
+
+        // Drag Plane Normal
+        Vector3f planeNormal = axisDir.cross(camForward).normalize();
+
+        // Ray ↔ Plane intersection
+        float denom = planeNormal.dot(rayDir);
+        if(Math.abs(denom) < 0.0001f)
+            return new Vector3f(gizmoPos);
+
+        float t = new Vector3f(gizmoPos)
+                .sub(rayOrigin)
+                .dot(planeNormal) / denom;
+
         return new Vector3f(rayOrigin).add(new Vector3f(rayDir).mul(t));
     }
+
 
     public static Vector3f closestPointRayToLine(
             Vector3f rayOrigin,
@@ -116,4 +125,23 @@ public class EditorCameraUtil {
 
         return new Vector3f(linePoint).add(new Vector3f(lineDir).mul(tc));
     }
+
+    public static Vector3f rayPlaneIntersection(
+            Vector3f rayOrigin,
+            Vector3f rayDir,
+            Vector3f planePoint,
+            Vector3f planeNormal
+    ){
+        float denom = planeNormal.dot(rayDir);
+
+        if(Math.abs(denom) < 0.00001f)
+            return null; // wichtig!
+
+        float t = new Vector3f(planePoint)
+                .sub(rayOrigin)
+                .dot(planeNormal) / denom;
+
+        return new Vector3f(rayOrigin).add(new Vector3f(rayDir).mul(t));
+    }
+
 }

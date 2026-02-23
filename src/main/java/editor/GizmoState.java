@@ -10,4 +10,6 @@ public class GizmoState {
     }
     public static Axis activeAxis = Axis.NONE;
     public static Axis hoverAxis = Axis.NONE;
+    public static Vector3f dragPlaneNormal = new Vector3f();
+    public static Vector3f dragPlanePoint  = new Vector3f();
 }
